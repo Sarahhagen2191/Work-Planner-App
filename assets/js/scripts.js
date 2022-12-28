@@ -1,19 +1,19 @@
-//Display the current date at the top of the application 
 var $currentDay = $("#currentDay");
 var $timeBlocks = $(".time-block");
 var $scheduleArea = $(".schedule");
 
 var toDoItems = [];
+
 //each object has a hour property and a text property
 
 var currentDate = moment().format("dddd, MMMM Do");
 var currentHour = moment().format("H");
 
 
-//display current date
+//Display the current date at the top of the application 
 $currentDay.text(currentDate); 
 
-//add style to time blocks to show where we are in the day
+// Colour code the time block based on the curent time - using css classes? 
 $timeBlocks.each(function(){
   var $thisBlock = $(this);
   var thisBlockHr = parseInt($thisBlock.attr("data-hour"));
@@ -48,33 +48,43 @@ function initializeTodos(){
     //console.log(toDoItems);
   }
 
-  function renderSchedule(){
+  function renderSchedule(){toDoItems = localStorage.getItem("todos");
+  toDoItems = JSON.parse(toDoItems);
+
+  //loop thru array then assign the text to the timeBlock with data-hour equal to hour. 
+  //make a variable where [data-hour={hour}] then plug it in to the selector $('[data-hour={hour}')
+  for (var i = 0; i < toDoItems.length; i++){
+    var itemHour = toDoItems[i].hour;
+    var itemText = toDoItems[i].text; 
+    console.log(itemHour + "|" + itemText);
+    $("[data-hour=" + itemHour + "]").children("textarea").val(itemText);
+  }
 
 }
 
 function saveHandler(){
-//event.preventDefault();
-if (event.target.matches("button")){
-
-  var hourToUpdate = event.target.parentElement.getAttribute("data-hour");
-  var itemToAdd = (($(event.target).parent()).children("textarea")).val();
-  //i was having issues bc i was mixing javascript selectors with jquery functions... lets fix his
-
-  //see which item we need to update based on the hour of the button clicked matching
-  for (var j = 0; j < toDoItems.length; j++){
-    if (toDoItems[j].hour == hourToUpdate){
-      //set its text to what was added to textarea
-      toDoItems[j].text = itemToAdd;
+    //event.preventDefault();
+    if (event.target.matches("button")){
+      var hourToUpdate = event.target.parentElement.getAttribute("data-hour");
+      var itemToAdd = (($(event.target).parent()).children("textarea")).val();
+      //i was having issues bc i was mixing javascript selectors with jquery functions... lets fix his
+      //see which item we need to update based on the hour of the button clicked matching
+      for (var j = 0; j < toDoItems.length; j++){
+        if (toDoItems[j].hour == hourToUpdate){
+          //set its text to what was added to textarea
+          toDoItems[j].text = itemToAdd;
+        }
+      }
+      localStorage.setItem("todos", JSON.stringify(toDoItems));
+      renderSchedule();
     }
-  }
-}
-  //renderSchedule();
-  console.log(toDoItems);
+
 }
 
 //add event listener to buttons
 $().ready(function(){
-  initializeTodos();
+  //initializeTodos();
+  renderSchedule();
   $scheduleArea.click(saveHandler);
 
 });
